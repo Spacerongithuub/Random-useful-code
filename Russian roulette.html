@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixelated Russian Roulette</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #000;
+      color: #fff;
+      overflow: hidden;
+    }
+
+    #warning-screen, #game-screen {
+      display: none;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background: #1e1e1e;
+    }
+
+    #warning-screen {
+      display: flex;
+      background: linear-gradient(45deg, #2e2e2e, #1c1c1c);
+      color: #f00;
+    }
+
+    .table {
+      width: 500px;
+      height: 300px;
+      background: #654321;
+      border: 5px solid #43290f;
+      position: relative;
+    }
+
+    .player-hands, .figure-hands {
+      position: absolute;
+      width: 100px;
+      height: 50px;
+      background: #d2a679;
+    }
+
+    .player-hands {
+      bottom: -60px;
+      left: 200px;
+    }
+
+    .figure-hands {
+      top: -60px;
+      left: 200px;
+      background: #444;
+    }
+
+    .gun {
+      position: absolute;
+      width: 50px;
+      height: 20px;
+      background-size: cover;
+      background-position: center;
+      top: 140px;
+      left: 225px;
+      transition: transform 1s ease;
+    }
+
+    .gun-message {
+      position: absolute;
+      bottom: 20%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 16px;
+      font-weight: bold;
+      color: yellow;
+      text-align: center;
+    }
+
+    .message {
+      position: absolute;
+      bottom: 10%;
+      font-size: 18px;
+      text-align: center;
+      width: 100%;
+    }
+
+    #shoot-button, #reset-button {
+      position: absolute;
+      bottom: 3%;
+      padding: 10px 20px;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      border-radius: 5px;
+      background: #0077ff;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    #shoot-button:hover, #reset-button:hover {
+      background: #0056cc;
+    }
+  </style>
+</head>
+<body>
+  <!-- Warning Screen -->
+  <div id="warning-screen">
+    <h1>!⚠️Warning⚠️!</h1>
+    <p>This game includes: simulated guns, self-harm and suicide and is suitable for players aged 18 and older.</p>
+    <button id="start-game-button">I Understand, Start Game</button>
+  </div>
+
+  <!-- Game Screen -->
+  <div id="game-screen">
+    <div class="table">
+      <div class="figure-hands"></div>
+      <div class="player-hands"></div>
+      <div class="gun" id="gun"></div>
+      <div class="gun-message" id="gun-message"></div>
+    </div>
+    <div class="message" id="status-message">The figure loads the gun...</div>
+    <button id="shoot-button" style="display: none;">Pull the Trigger</button>
+    <button id="reset-button" style="display: none;">Reset Game</button>
+  </div>
+
+  <audio id="click-sound" src="file:///C:/Users/matts/Downloads/sound-effects-single-gun-shot-247124.mp3"></audio>
+  <audio id="gunshot-sound" src="file:///C:/Users/matts/Downloads/sniper-rifle-firing-shot-1-39789.mp3"></audio>
+  <audio id="reload-sound" src="file:///C:/Users/matts/Downloads/reload-123781.mp3"></audio>
+  <audio id="spin-sound" src="file:///C:/Users/matts/Downloads/revolver-spin-96947.mp3"></audio>
+  <audio id="trigger-pull-sound"file:///C:/Users/matts/Downloads/trigger-36813.mp3"></audio>
+
+  <script>
+    const warningScreen = document.getElementById("warning-screen");
+    const gameScreen = document.getElementById("game-screen");
+    const startGameButton = document.getElementById("start-game-button");
+    const gunMessage = document.getElementById("gun-message");
+    const statusMessage = document.getElementById("status-message");
+    const shootButton = document.getElementById("shoot-button");
+    const resetButton = document.getElementById("reset-button");
+    const gun = document.getElementById("gun");
+    const clickSound = document.getElementById("click-sound");
+    const gunshotSound = document.getElementById("gunshot-sound");
+    const reloadSound = document.getElementById("reload-sound");
+    const spinSound = document.getElementById("spin-sound");
+    const triggerPullSound = document.getElementById("trigger-pull-sound");
+
+    let chamber = 0; // Bullet position (0-5)
+    let currentPosition = 0; // Current chamber being fired
+    let isFigureTurn = true; // Tracks whose turn it is
+
+    // Add gun image via base64
+    const gunImageURL = "data:image/png;base64,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";
+    gun.style.backgroundImage = `url('${gunImageURL}')`;
+
+    // Show warning screen on load
+    window.onload = () => {
+      warningScreen.style.display = "flex";
+    };
+
+    // Start game after warning
+    startGameButton.addEventListener("click", () => {
+      warningScreen.style.display = "none";
+      gameScreen.style.display = "flex";
+      initializeGame();
+    });
+
+    // Initialize the game
+    function initializeGame() {
+      chamber = Math.floor(Math.random() * 6); // Randomize bullet position
+      currentPosition = 0;
+      statusMessage.textContent = "The figure loads the gun...";
+      playSound("reload");
+      gunMessage.textContent = "Loading...";
+      setTimeout(() => {
+        gunMessage.textContent = "";
+        figureTakesTurn();
+      }, 2000);
+    }
+
+    // Figure's turn
+    function figureTakesTurn() {
+      statusMessage.textContent = "The other person spins the revolver...";
+      playSound("spin");
+      gunMessage.textContent = "Spinning...";
+      gun.style.transform = "translateY(-60px)";
+      setTimeout(() => {
+        gunMessage.textContent = "Pulling the trigger...";
+        playSound("trigger-pull");
+        statusMessage.textContent = "The other person pulls the trigger...";
+        pullTrigger(() => {
+          if (currentPosition === chamber) {
+            playSound("gunshot");
+            gunMessage.textContent = "Real bullet!";
+            statusMessage.textContent = "Oooo! The other person is out.";
+            shootButton.style.display = "none";
+            resetButton.style.display = "block";
+          } else {
+            playSound("click");
+            gunMessage.textContent = "Blank...";
+            statusMessage.textContent = "Blank... The other person survived.";
+            setTimeout(slideGunToPlayer, 2000);
+          }
+        });
+      }, 2000);
+    }
+
+    // Player's turn
+    function playerTakesTurn() {
+      gunMessage.textContent = "Pulling the trigger...";
+      playSound("trigger-pull");
+      statusMessage.textContent = "You pull the trigger...";
+      pullTrigger(() => {
+        if (currentPosition === chamber) {
+          playSound("gunshot");
+          gunMessage.textContent = "Real bullet!";
+          statusMessage.textContent = "Ooo! You're out.";
+          shootButton.style.display = "none";
+          resetButton.style.display = "block";
+        } else {
+          playSound("click");
+          gunMessage.textContent = "Blank...";
+          statusMessage.textContent = "Blank... You survived.";
+          setTimeout(slideGunToFigure, 2000);
+        }
+      });
+    }
+
+    // Pull the trigger
+    function pullTrigger(callback) {
+      setTimeout(() => {
+        currentPosition = (currentPosition + 1) % 6; // Advance chamber
+        callback();
+      }, 2000);
+    }
+
+    // Play sound
+    function playSound(type) {
+      if (type === "click") {
+        clickSound.currentTime = 0;
+        clickSound.play();
+      } else if (type === "gunshot") {
+        gunshotSound.currentTime = 0;
+        gunshotSound.play();
+      } else if (type === "reload") {
+        reloadSound.currentTime = 0;
+        reloadSound.play();
+      } else if (type === "spin") {
+        spinSound.currentTime = 0;
+        spinSound.play();
+      } else if (type === "trigger-pull") {
+        triggerPullSound.currentTime = 0;
+        triggerPullSound.play();
+      }
+    }
+
+    // Slide gun to player
+    function slideGunToPlayer() {
+      gun.style.transform = "translateY(60px)";
+      statusMessage.textContent = "Your turn. Pull the trigger.";
+      shootButton.style.display = "block";
+    }
+
+    // Slide gun to figure
+    function slideGunToFigure() {
+      gun.style.transform = "translateY(-60px)";
+      statusMessage.textContent = "The other person's turn.";
+      shootButton.style.display = "none";
+      setTimeout(figureTakesTurn, 2000);
+    }
+
+    // Player presses the "Pull the Trigger" button
+    shootButton.addEventListener("click", () => {
+      shootButton.style.display = "none";
+      playerTakesTurn();
+    });
+
+    // Reset the game
+    resetButton.addEventListener("click", () => {
+      resetButton.style.display = "none";
+      initializeGame();
+    });
+  </script>
+</body>
+</html>

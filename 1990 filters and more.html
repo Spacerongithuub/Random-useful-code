@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>1990s Image Filters & Webcam Capture</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .filter-container {
+            margin-top: 20px;
+        }
+
+        img {
+            max-width: 50%;
+            height: auto;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            margin-top: 20px;
+            position: relative;
+        }
+
+        select, input[type="file"], button {
+            margin: 10px;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+
+        .filter-preview {
+            margin-top: 20px;
+            position: relative;
+        }
+
+        video {
+            max-width: 100%;
+            height: auto;
+            border: 2px solid #fff;
+            border-radius: 5px;
+        }
+
+        canvas {
+            display: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <h1>1990s Image Filter Effects & Webcam Capture</h1>
+
+    <!-- Webcam Capture Section -->
+    <div class="webcam-container">
+        <video id="webcam" autoplay></video>
+        <button onclick="takeSnapshot()">Take a Picture</button>
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <!-- File Upload Section -->
+    <div>
+        <input type="file" id="imageUpload" accept="image/*" onchange="loadImage(event)">
+    </div>
+
+    <!-- Filter Selection -->
+    <div class="filter-container">
+        <label for="filters">Choose a 1990s filter:</label>
+        <select id="filters" onchange="applyFilter()">
+            <option value="none">None</option>
+            <option value="vhs-look">VHS Look (Grainy & Distorted)</option>
+            <option value="neon-glow">Neon Glow</option>
+            <option value="pixelate">Retro Pixelation</option>
+            <option value="glitch">Glitch Effect</option>
+            <option value="contrast(200%)">Retro Contrast</option>
+            <option value="sepia(0.7) saturate(1.5)">Old Film Look</option>
+        </select>
+    </div>
+    
+    <!-- Image Preview Section -->
+    <div class="filter-preview">
+        <img id="imagePreview" src="" alt="Image preview will appear here">
+        <div id="overlayText" style="position: absolute; top: 10px; left: 10px; font-size: 30px; color: black; font-family: Arial, sans-serif;"> </div>
+    </div>
+
+    <script>
+        // Webcam Setup
+        const webcamElement = document.getElementById('webcam');
+        const imagePreview = document.getElementById('imagePreview');
+        const overlayText = document.getElementById('overlayText');
+        const videoStream = navigator.mediaDevices.getUserMedia({ video: true });
+
+        // Start the webcam
+        videoStream.then(stream => {
+            webcamElement.srcObject = stream;
+        }).catch(error => {
+            alert("Couldn't access the webcam: " + error.message);
+        });
+
+        // Capture a photo from the webcam
+        function takeSnapshot() {
+            const canvasElement = document.createElement('canvas');
+            const context = canvasElement.getContext('2d');
+            canvasElement.width = webcamElement.videoWidth;
+            canvasElement.height = webcamElement.videoHeight;
+            context.drawImage(webcamElement, 0, 0, canvasElement.width, canvasElement.height);
+            const dataUrl = canvasElement.toDataURL('image/png');
+            imagePreview.src = dataUrl;
+            overlayText.style.display = "block"; // Show the text overlay when photo is captured
+        }
+
+        // Load image from file
+        function loadImage(event) {
+            var image = document.getElementById('imagePreview');
+            image.src = URL.createObjectURL(event.target.files[0]);
+            overlayText.style.display = "block"; // Show the text overlay when image is loaded
+        }
+
+        // Apply selected filter
+        function applyFilter() {
+            var filter = document.getElementById('filters').value;
+            var image = document.getElementById('imagePreview');
+
+            if (filter === "vhs-look") {
+                image.style.filter = "grayscale(0.5) contrast(150%) sepia(0.7) blur(2px)";
+            } else if (filter === "neon-glow") {
+                image.style.filter = "hue-rotate(90deg) saturate(2) brightness(1.5)";
+            } else if (filter === "pixelate") {
+                image.style.filter = "url(#pixelate)";
+            } else if (filter === "glitch") {
+                image.style.filter = "url(#glitch)";
+            } else if (filter === "contrast(200%)") {
+                image.style.filter = "contrast(200%)";
+            } else if (filter === "sepia(0.7) saturate(1.5)") {
+                image.style.filter = "sepia(0.7) saturate(1.5)";
+            } else {
+                image.style.filter = filter; // Default to other filters
+            }
+        }
+    </script>
+
+    <!-- Filter Effects (SVG Filters) for Pixelate and Glitch -->
+    <svg width="0" height="0">
+        <defs>
+            <!-- Pixelate Effect -->
+            <filter id="pixelate">
+                <feGaussianBlur stdDeviation="3" result="blur"></feGaussianBlur>
+                <feComponentTransfer in="blur" result="pixel" />
+                <feColorMatrix in="pixel" type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0" />
+            </filter>
+
+            <!-- Glitch Effect -->
+            <filter id="glitch">
+                <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="3" result="noise"></feTurbulence>
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="20" xChannelSelector="R" yChannelSelector="G" />
+            </filter>
+        </defs>
+    </svg>
+
+</body>
+</html>

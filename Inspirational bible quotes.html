@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inspirational Bible Quotes</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            text-align: center;
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            width: 300px;
+        }
+
+        #verseDisplay {
+            font-size: 18px;
+            margin: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            background-color: #fafafa;
+            height: 120px;
+            overflow-y: auto;
+            border-radius: 5px;
+            transition: opacity 0.5s ease;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Inspirational Bible Quote</h1>
+        <div id="verseDisplay" class="verse-box">Click the button to get an inspirational verse.</div>
+        <button id="generateBtn" onclick="generateVerse()">Generate Verse</button>
+    </div>
+
+    <script>
+        // Inspirational Bible Verses
+        const verses = [
+            "For I know the plans I have for you, declares the Lord, plans for welfare and not for evil, to give you a future and a hope. - Jeremiah 29:11",
+            "The Lord is my shepherd; I shall not want. - Psalm 23:1",
+            "I can do all things through him who strengthens me. - Philippians 4:13",
+            "For God so loved the world, that he gave his only Son, that whoever believes in him should not perish but have eternal life. - John 3:16",
+            "The Lord is near to the brokenhearted and saves the crushed in spirit. - Psalm 34:18",
+            "But the fruit of the Spirit is love, joy, peace, forbearance, kindness, goodness, faithfulness, gentleness, and self-control. - Galatians 5:22-23",
+            "The Lord is my light and my salvation; whom shall I fear? - Psalm 27:1",
+            "Trust in the Lord with all your heart, and do not lean on your own understanding. - Proverbs 3:5",
+            "Cast all your anxiety on him because he cares for you. - 1 Peter 5:7",
+            "Be strong and courageous. Do not be afraid; do not be discouraged, for the Lord your God will be with you wherever you go. - Joshua 1:9",
+            "The Lord will fight for you; you need only to be still. - Exodus 14:14",
+            "And we know that in all things God works for the good of those who love him, who have been called according to his purpose. - Romans 8:28",
+            "So do not fear, for I am with you; do not be dismayed, for I am your God. I will strengthen you and help you; I will uphold you with my righteous right hand. - Isaiah 41:10",
+            "Let all that you do be done in love. - 1 Corinthians 16:14",
+            "The Lord is good to those who wait for him, to the soul who seeks him. - Lamentations 3:25",
+            "Be still, and know that I am God. - Psalm 46:10",
+            "The joy of the Lord is your strength. - Nehemiah 8:10",
+            "Do not be conformed to this world, but be transformed by the renewal of your mind. - Romans 12:2",
+            "I have told you these things, so that in me you may have peace. In this world you will have trouble. But take heart! I have overcome the world. - John 16:33",
+            "The Lord bless you and keep you; the Lord make his face shine on you and be gracious to you; the Lord turn his face toward you and give you peace. - Numbers 6:24-26",
+            "For the Spirit God gave us does not make us timid, but gives us power, love and self-discipline. - 2 Timothy 1:7",
+            "For we live by faith, not by sight. - 2 Corinthians 5:7"
+        ];
+
+        // Function to generate a random verse with a rapid cycling animation
+        function generateVerse() {
+            const verseDisplay = document.getElementById("verseDisplay");
+            let cycles = 0;
+            const totalCycles = 500; // Total number of cycles to show quotes in 2 seconds
+            const intervalTime = 4; // 2 seconds divided by 500 cycles (~4 milliseconds per cycle)
+            
+            // Show verses rapidly for 2 seconds
+            const interval = setInterval(() => {
+                const randomIndex = Math.floor(Math.random() * verses.length);
+                verseDisplay.innerText = verses[randomIndex];
+                cycles++;
+                
+                if (cycles >= totalCycles) {
+                    clearInterval(interval);
+                    // Show the final random verse after rapid cycling
+                    const finalIndex = Math.floor(Math.random() * verses.length);
+                    verseDisplay.innerText = verses[finalIndex];
+                }
+            }, intervalTime);
+        }
+    </script>
+</body>
+</html>
